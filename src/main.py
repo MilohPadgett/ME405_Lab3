@@ -18,6 +18,11 @@ import ClosedLoopContoller
 import EncoderReader
 import MotorDriver
 
+
+'''!
+Initializes a motor driver on pins B4,B5, and PA10
+Initializes an encoder 
+'''
 def init_flywheel_one():
      #Set up pins and timer channel.
     in1 = pyb.Pin(pyb.Pin.board.PB4, pyb.Pin.OUT_PP)
@@ -58,11 +63,19 @@ def task1_fun(shares):
     """
     # Get references to the share and queue which have been passed to this task
     my_share, my_queue = shares
-
+    n = 0
     (encoder,motorA,controller) = init_flywheel_one()
 
     while True:
-        control_loop_one(encoder,motorA,controller)
+        if (n<500):
+            control_loop_one(encoder,motorA,controller)
+            n+=1
+        elif n==500:
+            controller.get_response()
+            n+=1
+        else:
+            pass
+            
         yield 0
 
 
