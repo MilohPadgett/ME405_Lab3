@@ -46,23 +46,23 @@ def init_flywheel_one():
 
 def init_flywheel_two():
      #Set up pins and timer channel.
-    in1 = pyb.Pin(pyb.Pin.board., pyb.Pin.OUT_PP)
-    in2 = pyb.Pin(pyb.Pin.board., pyb.Pin.OUT_PP)
-    en = pyb.Pin(pyb.Pin.board., pyb.Pin.OUT_PP)
-    timer = pyb.Timer(,freq=20000)
+    in1 = pyb.Pin(pyb.Pin.board.PA0, pyb.Pin.OUT_PP)
+    in2 = pyb.Pin(pyb.Pin.board.PA1, pyb.Pin.OUT_PP)
+    en = pyb.Pin(pyb.Pin.board.PC1, pyb.Pin.OUT_PP)
+    timer = pyb.Timer(2,freq=20000)
     
     #Create motor driver object
-    motorB = MotorDriver.MotorDriver(en,in1,in2,timer,False)
+    motorB = MotorDriver.MotorDriver(en,in1,in2,timer,True)
 
     #Set the GPIO pins and timer channel to pass into the encoder class
     ch1 = pyb.Pin (pyb.Pin.board.PB6, pyb.Pin.IN)
     ch2 = pyb.Pin (pyb.Pin.board.PB7, pyb.Pin.IN)
-    tim8 = pyb.Timer(,period=0xffff,prescaler = 0)
+    tim8 = pyb.Timer(4,period=0xffff,prescaler = 0)
     
     #Create encoder driver object
     encoder = EncoderReader.EncoderReader(ch1,ch2,tim8)
-
-    controller = ClosedLoopContoller.PController(.029,1050.0)
+    
+    controller = ClosedLoopContoller.PController(.025,3000.0)
     return (encoder,motorB,controller)
 
 
@@ -128,10 +128,10 @@ if __name__ == "__main__":
     # debugging and set trace to False when it's not needed
     task1 = cotask.Task(task1_fun, name="Task_1", priority=1, period=10,
                         profile=True, trace=False, shares=(share0, q0))
-    #task2 = cotask.Task(task2_fun, name="Task_2", priority=2, period=1500,
-    #                    profile=True, trace=False, shares=(share0, q0))
+    task2 = cotask.Task(task2_fun, name="Task_2", priority=2, period=50,
+                        profile=True, trace=False, shares=(share0, q0))
     cotask.task_list.append(task1)
-    #cotask.task_list.append(task2)
+    cotask.task_list.append(task2)
 
     # Run the memory garbage collector to ensure memory is as defragmented as
     # possible before the real-time scheduler is started
@@ -147,5 +147,5 @@ if __name__ == "__main__":
     # Print a table of task data and a table of shared information data
     print('\n' + str (cotask.task_list))
     print(task_share.show_all())
-    print(task1.get_trace())
+    print(task2.get_trace())
     print('')
