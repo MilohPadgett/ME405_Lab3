@@ -44,6 +44,28 @@ def init_flywheel_one():
     controller = ClosedLoopContoller.PController(.029,1050.0)
     return (encoder,motorA,controller)
 
+def init_flywheel_two():
+     #Set up pins and timer channel.
+    in1 = pyb.Pin(pyb.Pin.board., pyb.Pin.OUT_PP)
+    in2 = pyb.Pin(pyb.Pin.board., pyb.Pin.OUT_PP)
+    en = pyb.Pin(pyb.Pin.board., pyb.Pin.OUT_PP)
+    timer = pyb.Timer(,freq=20000)
+    
+    #Create motor driver object
+    motorB = MotorDriver.MotorDriver(en,in1,in2,timer,False)
+
+    #Set the GPIO pins and timer channel to pass into the encoder class
+    ch1 = pyb.Pin (pyb.Pin.board.PB6, pyb.Pin.IN)
+    ch2 = pyb.Pin (pyb.Pin.board.PB7, pyb.Pin.IN)
+    tim8 = pyb.Timer(,period=0xffff,prescaler = 0)
+    
+    #Create encoder driver object
+    encoder = EncoderReader.EncoderReader(ch1,ch2,tim8)
+
+    controller = ClosedLoopContoller.PController(.029,1050.0)
+    return (encoder,motorB,controller)
+
+
 def control_loop_one(encoder: EncoderReader.EncoderReader,
                      motorA: MotorDriver.MotorDriver,
                      controller: ClosedLoopContoller.PController):
@@ -67,16 +89,9 @@ def task1_fun(shares):
     (encoder,motorA,controller) = init_flywheel_one()
 
     while True:
-        if (n<500):
-            control_loop_one(encoder,motorA,controller)
-            n+=1
-        elif n==500:
-            controller.get_response()
-            n+=1
-        else:
-            pass
-            
+        control_loop_one(encoder,motorA,controller)
         yield 0
+        
 
 
 def task2_fun(shares):
@@ -85,16 +100,14 @@ def task2_fun(shares):
     @param shares A tuple of a share and queue from which this task gets data
     """
     # Get references to the share and queue which have been passed to this task
-    the_share, the_queue = shares
+    my_share, my_queue = shares
+    
+    (encoder,motorB,controller) = init_flywheel_two()
 
     while True:
-        # Show everything currently in the queue and the value in the share
-        print(f"Share: {the_share.get ()}, Queue: ", end='')
-        while q0.any():
-            print(f"{the_queue.get ()} ", end='')
-        print('')
-
+        control_loop_one(encoder,motorB,controller)
         yield 0
+
 
 
 # This code creates a share, a queue, and two tasks, then starts the tasks. The
