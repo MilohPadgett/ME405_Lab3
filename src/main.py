@@ -1,29 +1,31 @@
 """!
-@file basic_tasks.py
-    This file contains a demonstration program that runs some tasks, an
-    inter-task shared variable, and a queue. The tasks don't really @b do
-    anything; the example just shows how these elements are created and run.
+@file main.py
+    This file contains a program that uses tasks to run motors for a set
+    number of encoder ticks using the ClosedLoopController, EncoderReader,
+    and MotorDriver classes. 
 
-@author JR Ridgely
-@date   2021-Dec-15 JRR Created from the remains of previous example
-@copyright (c) 2015-2021 by JR Ridgely and released under the GNU
-    Public License, Version 2. 
+
+@author Miloh Padgett, Tristan Cavarno, Jon Abraham
+@date   2023-Feb-07
 """
 
 import gc
 import pyb
 import cotask
 import task_share
-import ClosedLoopContoller
+import ClosedLoopController
 import EncoderReader
 import MotorDriver
 
 
-'''!
-Initializes a motor driver on pins B4,B5, and PA10
-Initializes an encoder 
-'''
+
 def init_flywheel_one():
+    '''!
+    This function initializes a motor driver on pins B4,B5, and PA10
+    and initializes an encoder on pins C6 and C7. 
+    @param NA
+    @returns intialized encoder motor and controller objects
+    '''
      #Set up pins and timer channel.
     in1 = pyb.Pin(pyb.Pin.board.PB4, pyb.Pin.OUT_PP)
     in2 = pyb.Pin(pyb.Pin.board.PB5, pyb.Pin.OUT_PP)
@@ -40,11 +42,17 @@ def init_flywheel_one():
     
     #Create encoder driver object
     encoder = EncoderReader.EncoderReader(ch1,ch2,tim8)
-
-    controller = ClosedLoopContoller.PController(.029,1050.0)
+    #run the contoller
+    controller = ClosedLoopController.PController(.029,1050.0)
     return (encoder,motorA,controller)
 
 def init_flywheel_two():
+    '''!
+    This function initializes a motor driver on pins A0,A1, and C1
+    and initializes an encoder on pins B6 ans B7. 
+    @param NA
+    @returns intialized encoder motor and controller objects
+    '''
      #Set up pins and timer channel.
     in1 = pyb.Pin(pyb.Pin.board.PA0, pyb.Pin.OUT_PP)
     in2 = pyb.Pin(pyb.Pin.board.PA1, pyb.Pin.OUT_PP)
@@ -61,14 +69,20 @@ def init_flywheel_two():
     
     #Create encoder driver object
     encoder = EncoderReader.EncoderReader(ch1,ch2,tim8)
-    
-    controller = ClosedLoopContoller.PController(.025,3000.0)
+    #run the contoller
+    controller = ClosedLoopController.PController(.025,3000.0)
     return (encoder,motorB,controller)
 
 
 def control_loop_one(encoder: EncoderReader.EncoderReader,
                      motorA: MotorDriver.MotorDriver,
-                     controller: ClosedLoopContoller.PController):
+                     controller: ClosedLoopController.PController):
+    """!
+    This function contains a motor control loop which reads encoder ticks,
+    claculates the desired duty cycle, and runs the motor at that duty cycle.
+    @param encoder motor and controller class objects
+    @returns NA
+    """
     #Read encoder value
     encoder.read()
     actual = encoder.ticks
@@ -80,7 +94,8 @@ def control_loop_one(encoder: EncoderReader.EncoderReader,
 
 def task1_fun(shares):
     """!
-    Task which puts things into a share and a queue.
+    Task which initializes encoder, motor, and controller objects,
+    and then feeds those to the close loop function.
     @param shares A list holding the share and queue used by this task
     """
     # Get references to the share and queue which have been passed to this task
@@ -96,7 +111,8 @@ def task1_fun(shares):
 
 def task2_fun(shares):
     """!
-    Task which takes things out of a queue and share and displays them.
+    Task which initializes encoder, motor, and controller objects
+    for a second motor and then feeds those to the close loop function.
     @param shares A tuple of a share and queue from which this task gets data
     """
     # Get references to the share and queue which have been passed to this task
