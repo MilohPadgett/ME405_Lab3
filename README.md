@@ -3,10 +3,10 @@
 
 ## Overview 
 This lab involves applying the previously used **ClossedLoopController**, **MotorDriver**, and **EncoderReader** 
-modules to the concept of tasks. The preformance of the **ClosedLoopController** was tested under differing sample and response periods to show the degrading preformance as a function of sample period. The utility of tasking was then explored through the introduction of a second flywheel motor. Pseudo-parallelism was used to drive two motors at the same time to differing steady state positions.
+modules to the concept of tasks. The performance of the **ClosedLoopController** was tested under differing sample and response periods to show the degrading performance as a function of sample period. The utility of tasking was then explored through the introduction of a second flywheel motor. Pseudo-parallelism was used to drive two motors at the same time to differing steady state positions.
 
 ## Single Task P-Control
-Using the source code from *Lab 2* A task was broken up into two major section the **init_flywheel_one()** and **control_loop_one()**. Initialiation of used modudes occures during the first call to (or first few calls if this time takes longer than the period) **task1_fun()**. Then the **task1_fun** will loop forever yeilding  to the scheduler after each iteration of the loop. This is where **control_loop_one()** samples the the encoder, generates the according motor output, and changes the motor speed.
+Using the source code from *Lab 2* A task was broken up into two major section the **init_flywheel_one()** and **control_loop_one()**. Initialiation of used modules occurs during the first call to (or first few calls if this time takes longer than the period) **task1_fun()**. Then the **task1_fun** will loop forever yeilding  to the scheduler after each iteration of the loop. This is where **control_loop_one()** samples the the encoder, generates the according motor output, and changes the motor speed.
 
 For ease of data collection a variable *n* was created during initalization to count the number of yields and thus a rough approximation of time. Each iteration, n was incremented until a target value was reached. The motors where then turned off and **get_response()** was called printing all time-output pairs to the thonny console. This was copy pasted into a csv file and the plots below were generated using hw1's python script.
 
